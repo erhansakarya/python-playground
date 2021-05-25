@@ -1,11 +1,12 @@
 import socket
 import threading
+import json
+from json import JSONEncoder
 
 SERVER = socket.gethostbyname(socket.gethostname())
 PORT = 5050
 ADDR = (SERVER, PORT)
 HEADER = 64
-FORMAT = "utf-8"
 DISCONNECT_MESSAGE = "!DISCONNECT"
 
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -15,14 +16,17 @@ def handleClient(conn, addr):
     print(f"[NEW CONNECTION] {addr} connected.")
     connected = True
     while connected:
-        messageLength = conn.recv(HEADER).decode(FORMAT)
+        messageLength = conn.recv(HEADER).decode()
         if messageLength:
             messageLength = int(messageLength)
-            message = conn.recv(messageLength).decode(FORMAT)
+            message = conn.recv(messageLength).decode()
             if message == DISCONNECT_MESSAGE:
                 connected = False
+            else:
+                received = json.loads(message)
+                print("command:" + received["command"])
+                print("message:" + received["message"])
             print(f"[{addr}] {message}")
-            conn.send("message received.".encode(FORMAT))
     conn.close()
     print(f"[{addr}] connection closed")
 

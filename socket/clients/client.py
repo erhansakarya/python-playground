@@ -1,4 +1,6 @@
 import socket
+import json
+from json import JSONEncoder
 
 SERVER = "192.168.1.5"
 PORT = 5050
@@ -11,13 +13,17 @@ client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 client.connect(ADDR)
 
 def send(message):
-    message = message.encode(FORMAT)
+    message = message
     messageLength = len(message)
-    sendLengthMessage = str(messageLength).encode(FORMAT)
-    sendLengthMessage += b' ' * (HEADER - len(sendLengthMessage))
-    client.send(sendLengthMessage)
-    client.send(message)
-    
-send("Merhaba!")
-send("Hello!")
+    sendLengthMessage = str(messageLength)
+    sendLengthMessage += " " * (HEADER - len(sendLengthMessage))
+    client.send(sendLengthMessage.encode())
+    client.send(message.encode())
+
+def createCommandMessage(command, message):
+    commandMessage = {"command":command, "message":message}
+    return json.dumps(commandMessage)
+
+send(createCommandMessage("create", "resource1"))
+send(createCommandMessage("delete", "resource2"))
 send(DISCONNECT_MESSAGE)
